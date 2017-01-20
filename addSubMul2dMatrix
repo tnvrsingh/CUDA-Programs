@@ -1,0 +1,258 @@
+//lab2 program for adding 1d matrix elements
+/*#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+
+#include <stdio.h>
+
+void addWithCuda(int *c, const int *a, const int *b, unsigned int size);
+
+__global__ void addKernel(int *c, const int *a, const int *b)
+{
+    int i = blockDim.x*blockIdx.x+threadIdx.x;
+    c[i] = a[i] + b[i];
+}
+
+int main()
+{
+    const int arraySize = 5000;
+	const int Size=1000;
+    int a[arraySize]; 
+	int b[arraySize];
+    int c[arraySize] ;
+	int i;
+	for(i=0;i<arraySize;i++)
+	{
+		a[i]=1;
+		b[i]=2;
+	}
+	 // Add vectors in parallel.
+    addWithCuda(c, a, b, arraySize);
+    for(i=0;i<arraySize;i++)
+	{
+		printf("\n %d",c[i]);
+	}
+   	return 0;
+}
+
+// Helper function for using CUDA to add vectors in parallel.
+void addWithCuda(int *c, const int *a, const int *b, unsigned int size)
+{
+    int *dev_a = 0;
+    int *dev_b = 0;
+    int *dev_c = 0;
+    cudaMalloc((void**)&dev_c, size * sizeof(int));
+    cudaMalloc((void**)&dev_a, size * sizeof(int));
+    cudaMalloc((void**)&dev_b, size * sizeof(int));
+    cudaMemcpy(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice);
+    addKernel<<<5, size/5>>>(dev_c, dev_a, dev_b);
+    cudaMemcpy(c, dev_c, size * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaFree(dev_c);
+    cudaFree(dev_a);
+    cudaFree(dev_b);
+    
+    
+}*/
+
+
+//lab3 addition subtraction and multiplication of 2d matrices
+
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+#include <stdio.h>
+void mulwithCuda(int *a,int *b,int *c,int r,int co);
+void addwithCuda(int *a,int *b,int *c,int r,int co);
+void subwithCuda(int *a,int *b,int *c,int r,int co);
+__global__ void addKernel(int *c,int *a,int *b,int r,int co)
+{
+	int row=blockIdx.y*blockDim.y+threadIdx.y;
+	int col=blockIdx.x*blockDim.x+threadIdx.x;
+	if((row<r)&&(col<co))
+		c[row*r+col]=a[row*r+col]+b[row*r+col];
+
+}
+__global__ void subKernel(int *c,int *a,int *b,int r,int co)
+{
+	int row=blockIdx.y*blockDim.y+threadIdx.y;
+	int col=blockIdx.x*blockDim.x+threadIdx.x;
+	if((row<r)&&(col<co))
+		c[row*r+col]=a[row*r+col]-b[row*r+col];
+
+}
+__global__ void mulKernel(int *c,int *a,int *b,int r,int co)
+{
+	float sum=0;
+	int row=blockIdx.y*blockDim.y+threadIdx.y;
+	int col=blockIdx.x*blockDim.x+threadIdx.x;
+	if((row<r)&&(col<co))
+		for(int i=0;i<r;i++)
+			sum+=a[row*r+i]*b[col*co+i];
+	c[row*r+co]=sum;
+	//each thread is supposed to compute one element of the block
+
+}
+void mulwithCuda(int *a,int *b,int *c,int r,int co)
+{
+	
+	
+}
+/*void addwithCuda(int a[5][5],int b[5][5],int c[5][5],int r,int co)
+{
+	int *d_a = 0;
+    int *d_b = 0;
+    int *d_c = 0;
+    cudaMalloc((void**)&d_c, r*co * sizeof(int));
+    cudaMalloc((void**)&d_a, r*co * sizeof(int));
+    cudaMalloc((void**)&d_b, r*co * sizeof(int));
+    cudaMemcpy(d_a, a, r*co * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, b, r*co * sizeof(int), cudaMemcpyHostToDevice);
+    dim3 Dimbl(5,5,1);
+	dim3 Dimthr(5,5,1);
+	addKernel<<<Dimbl, Dimthr>>>(d_c, d_a, d_b,r,co);
+    cudaMemcpy(c, d_c, r*co * sizeof(int), cudaMemcpyDeviceToHost);
+	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("A: %d ",a[i][j]);
+		}
+		printf("\n");
+	}
+	 	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("B: %d ",b[i][j]);
+		}
+		printf("\n");
+	}
+		 	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("C: %d ",c[i][j]);
+		}
+		printf("\n");
+	}
+    cudaFree(d_c);
+    cudaFree(d_a);
+    cudaFree(d_b);
+}*/
+void subwithCuda(int *a,int *b,int *c,int r,int co)
+{
+}
+int main()
+{
+	int r=5,co=5;
+	//const int Size=1000;
+    int a[5][5]; 
+	int b[5][5];
+    int c[5][5] ;
+	int i,j;
+	for(i=0;i<r;i++)
+	{
+		for(j=0;j<co;j++)
+		{	a[i][j]=1;
+			b[i][j]=2;
+		}
+	}
+	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("A: %d ",a[i][j]);
+		}
+		printf("\n");
+	}
+	 	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("B: %d ",b[i][j]);
+		}
+		printf("\n");
+	}
+	 // Add vectors in parallel.
+    //addwithCuda(c, a, b,r,co);
+    int *d_a = 0;
+    int *d_b = 0;
+    int *d_c = 0;
+    cudaMalloc((void**)&d_c, r*co * sizeof(int));
+    cudaMalloc((void**)&d_a, r*co * sizeof(int));
+    cudaMalloc((void**)&d_b, r*co * sizeof(int));
+    cudaMemcpy(d_a, a, r*co * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, b, r*co * sizeof(int), cudaMemcpyHostToDevice);
+    dim3 Dimbl(5,5,1);
+	dim3 Dimthr(5,5,1);
+	addKernel<<<Dimbl, Dimthr>>>(d_c, d_a, d_b,r,co);
+    cudaMemcpy(c, d_c, r*co * sizeof(int), cudaMemcpyDeviceToHost);
+	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("A: %d ",a[i][j]);
+		}
+		printf("\n");
+	}
+	 	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("B: %d ",b[i][j]);
+		}
+		printf("\n");
+	}
+		 	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("C: %d ",c[i][j]);
+		}
+		printf("\n");
+	}
+    //cudaFree(d_c);
+    //cudaFree(d_a);
+    //cudaFree(d_b);
+	subKernel<<<Dimbl, Dimthr>>>(d_c, d_a, d_b,r,co);
+    cudaMemcpy(c, d_c, r*co * sizeof(int), cudaMemcpyDeviceToHost);
+	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("A: %d ",a[i][j]);
+		}
+		printf("\n");
+	}
+	 	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("B: %d ",b[i][j]);
+		}
+		printf("\n");
+	}
+		 	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("C: %d ",c[i][j]);
+		}
+		printf("\n");
+	}
+	mulKernel<<<Dimbl,Dimthr>>>(d_c,d_a,d_b,r,co);
+	cudaMemcpy(c, d_c, r*co * sizeof(int), cudaMemcpyDeviceToHost);
+	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("A: %d ",a[i][j]);
+		}
+		printf("\n");
+	}
+	 	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("B: %d ",b[i][j]);
+		}
+		printf("\n");
+	}
+		 	 for(int i=0;i<r;i++)
+	{
+		for(int j=0;j<co;j++)
+		{	printf("C: %d ",c[i][j]);
+		}
+		printf("\n");
+	}
+    cudaFree(d_c);
+    cudaFree(d_a);
+    cudaFree(d_b);
+   	return 0;
+}
